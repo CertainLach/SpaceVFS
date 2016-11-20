@@ -31,15 +31,6 @@ async function readdir(path){
 }
 
 /*
-	this.readdir = (path,cb)=>{
-		// names of things in path
-		if(path=='/')
-			cb(0,['test']) // ,'a.txt','b.jpg'])
-		else
-			cb(0)
-		}//func */
-
-/*
 TODO:
 ops.access(path, mode, cb)
 ops.statfs(path, cb)
