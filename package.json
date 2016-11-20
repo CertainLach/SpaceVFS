@@ -4,10 +4,11 @@
   "description": "Virtual file system for Space IDE",
   "main": "index.js",
   "scripts": {
+    "start": "node --harmony index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "f6cf",
+  "license": "MIT",
   "dependencies": {
     "fuse-bindings": "^2.10.1"
   }
