@@ -3,37 +3,56 @@ const fs = require('fs');
 
 const package = require('./package.json');
 const operations = require('./operations.js');
-const config = require('./config.js');
+const {
+    VFS_PATH,
+    DEBUG,
+    FORCE
+} = require('./config.js');
 
 let isMounted = false;
 
 console.log('SPACE IDE VFS MOUNT');
 console.log(`VERSION:   ${package.version}`);
 console.log(`AUTHOR:    F6CF`);
+if(FORCE)
+    console.warn('"FORCE" can be harmful! Use at your own risk!');
 
-fs.mkdir(config.VFS_PATH, function (err) {
-    if (!err || err.code === 'EEXIST') {
-        fuse.mount(config.VFS_PATH, operations, (err) => {
-            if (err) {
-                console.log('Error on FUSE init!');
-                console.log(err);
-            }
-            else {
-                isMounted = true;
-            }
-        });
-    }
-    else {
-        console.log('Error on mounting creating directory for virtual file system!');
-        console.log(err);
-    }
-});
+function continueMount(){
+    fuse.mount(VFS_PATH, operations, err => {
+        if (err) {
+            console.error('Error on FUSE init!');
+            console.error(err);
+        }
+        else {
+            console.log(`VFS mounted on ${VFS_PATH}`);
+            isMounted = true;
+        }
+    });
+}
 
-process.on('SIGINT', function () {
+if(VFS_PATH[1]!==':'){
+    console.log('Mounting as folder...');
+    fs.mkdir(VFS_PATH, err => {
+        if (!err || err.code === 'EEXIST') {
+            continueMount();
+        }
+        else {
+            console.error('Error on mounting creating directory for virtual file system!');
+            console.error(err);
+        }
+    });
+}
+else{
+    console.log('Mounting as drive...');
+    continueMount()
+}
+
+process.on('SIGINT', () => {
     if (isMounted) {
         console.log('Unmounting vfs...');
-        fuse.unmount(__dirname + '/vfs', function (e) {
-            console.log(e);
+        fuse.unmount(VFS_PATH, err => {
+            console.error('Error on unmounting VFS!');
+            console.error(err);
             process.exit();
         });
     }

@@ -1,15 +1,43 @@
 const {
    asyncToCb,
    FuseError
-} = require('utils.js');
+} = require('./utils.js');
 
 const {
-   EINPROGRESS 
+    EINPROGRESS 
 } = require('fuse-bindings')
 
-async function init(){
-   throw new FuseError(EINPROGRESS,'WORK IN PROGRESS');
+const {
+    FORCE,
+    DISPLAY,
+    DIRECT_IO
+} = require('./config.js');
+
+const fuseOptions = [];
+if(DIRECT_IO){
+    console.warn('"DIRECT_IO" can cause a BSOD on Windows!');
+    fuseOptions.push('direct_io');
 }
+
+async function init(){
+      console.log('>> init()');
+      return; //OK
+}
+async function readdir(path){
+      console.log('>> readdir(%s)',path);
+      if(path=='/')
+            return ['a.c','index.js'];
+      return [];
+}
+
+/*
+	this.readdir = (path,cb)=>{
+		// names of things in path
+		if(path=='/')
+			cb(0,['test']) // ,'a.txt','b.jpg'])
+		else
+			cb(0)
+		}//func */
 
 /*
 TODO:
@@ -20,7 +48,6 @@ ops.fgetattr(path, fd, cb)
 ops.flush(path, fd, cb)
 ops.fsync(path, fd, datasync, cb)
 ops.fsyncdir(path, fd, datasync, cb)
-ops.readdir(path, cb)
 ops.truncate(path, size, cb)
 ops.ftruncate(path, fd, size, cb)
 ops.readlink(path, cb)
@@ -46,13 +73,19 @@ ops.rmdir(path, cb)
 ops.destroy(cb)
 */
 
-const exports = {init};
+const toExport = {
+    init,
+    readdir,
+    displayFolder: DISPLAY,
+    force: FORCE,
+    options: fuseOptions
+};
 
 //Convert to callbacks:
-for (let key in exports) {
-   let value = exports[key];
+for (let key in toExport) {
+   let value = toExport[key];
    if (typeof value == 'function')
-      exports[key] = asyncToCb(value);
+      toExport[key] = asyncToCb(value);
 }
 
-module.exports = {};
+module.exports = toExport;
